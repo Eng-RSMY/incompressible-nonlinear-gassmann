@@ -1,9 +1,8 @@
 #!/bin/bash
 
-bin2vts=${HOME}/bin2vts/build/bin2vts
+bin2vts=${HOME}/projects/bin2vts/build/bin2vts
+dir=${SCRATCH}/hom_z85
 
-#for i in `seq 1 2`; do
-for i in `ls output`; do
-  #${bin2vts} -i output/${i} -dim 3 -nx 60 -ny 220 -nz 1 -o output/${i}.vts
-  ${bin2vts} -i output/${i} -dim 2 -nx 60 -ny 220 -o output/${i}.vts
+for i in `ls ${dir}`; do
+  ${bin2vts} -i ${dir}/${i} -dim 3 -nx 60 -ny 220 -nz 85 -o ${dir}/${i}.vts
 done

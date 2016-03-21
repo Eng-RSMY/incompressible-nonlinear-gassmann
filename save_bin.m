@@ -1,5 +1,6 @@
 function save_bin(tp,name,S)
-fname=sprintf('output/%s_%i',name,tp);
+dir=getenv('SCRATCH');
+fname=sprintf('%s/%s_%i',dir,name,tp);
 fid=fopen(fname,'w');
 if (fid==-1) disp(['Cannot open file ', fname]); return; end
 fwrite(fid,S,'single');
