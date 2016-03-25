@@ -1,13 +1,13 @@
 dir=getenv('SCRATCH');
 
-fnames=['rhoB_2' 'vp_2' 'vs_2'];
+fnames={'rhoB_2','vp_2','vs_2'};
 above_prop=[2.2e+3 4.2e+3 2.3e+3];
 below_prop=[2.2e+3 4.2e+3 2.3e+3];
 scale_from_files=1.0e+3;
 
 for i=1:size(fnames(:))
-
-    fname=sprintf('%s/%s', dir, fnames(i));
+    
+    fname=sprintf('%s/%s', dir, fnames{i});
     disp(['Input file ', fname]);
     fid=fopen(fname, 'r');
     if (fid == -1)
@@ -19,8 +19,8 @@ for i=1:size(fnames(:))
     arr=reshape(arr,60,220,10);
     fclose(fid);
 
-    above=above_prop*ones(60,220,50);
-    below=below_prop*ones(60,220,100);
+    above=above_prop(i)*ones(60,220,50);
+    below=below_prop(i)*ones(60,220,100);
 
     fname_full=sprintf('%s_full',fname);
     disp(['Output file ', fname_full]);
