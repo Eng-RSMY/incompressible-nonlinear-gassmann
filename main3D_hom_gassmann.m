@@ -1,6 +1,6 @@
-Grid.Nx=60;  Grid.hx=20*.3048;          % Dimension in x-direction
-Grid.Ny=220; Grid.hy=10*.3048;          % Dimension in y-direction
-Grid.Nz=85;  Grid.hz=2*.3048;           % Dimension in z-direction
+Grid.Nx=60;  Grid.hx=20*.3;          % Dimension in x-direction
+Grid.Ny=220; Grid.hy=10*.3;          % Dimension in y-direction
+Grid.Nz=85;  Grid.hz=2*.3;           % Dimension in z-direction
 N=Grid.Nx*Grid.Ny*Grid.Nz;              % Number of grid celles
 Grid.V=Grid.hx*Grid.hy*Grid.hz;         % Volume of each cells
 Fluid.vw=3e-4; Fluid.vo=3e-3;           % Viscosities
@@ -40,6 +40,7 @@ Vp = 5.77*I - 6.94*Grid.por - 1.73*sqrt(C)*I + 0.446*(Pe - exp(-16.7*Pe))*I; % V
 Vs = 3.70*I - 4.94*Grid.por - 1.57*sqrt(C)*I + 0.361*(Pe - exp(-16.7*Pe))*I; % Vs according to Eberhart-Phillips et al, km/s
 save_bin(0,'vp_EbPh',Vp);
 save_bin(0,'vs_EbPh',Vs);
+Ip_initial = rhoB .* Vp; % initial impedance
 
 bulk_modulus = @(rho, vp, vs) rho .* (vp.^2 - 4.0/3.0*vs.^2);
 shear_modulus = @(rho, vs) rho .* vs.^2;
@@ -98,8 +99,11 @@ for tp=1:ND/Pt;
         vp_above = 4.2;
         I_above = vp_above * rho_above * I;
         RefAmp = (I_above - Ip) ./ (I_above + Ip);
+        RefAmp_initial = (I_above - Ip_initial) ./ (I_above + Ip_initial);
+        RefAmp_diff = RefAmp_initial - RefAmp;
 
         save_bin(tp,'VPdiff',Vp_diff);
         save_bin(tp,'Ip',Ip);
         save_bin(tp,'RefAmp',RefAmp);
+        save_bin(tp,'RefAmpDiff',RefAmp_diff);
 end
