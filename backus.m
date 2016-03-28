@@ -37,41 +37,36 @@ vs = scale_from_files*vs;
 vs = reshape(vs, 60, 220, 80);
 fclose(vs_fid);
 
-lambda = rhoB .* (vp.^2 - vs.^2);
+disp(['rhoB: min ', num2str(min(rhoB(:))), ', max ', num2str(max(rhoB(:)))]);
+disp(['vp: min ', num2str(min(vp(:))), ', max ', num2str(max(vp(:)))]);
+disp(['vs: min ', num2str(min(vs(:))), ', max ', num2str(max(vs(:)))]);
+
+lambda = rhoB .* (vp.^2 - 2.0*vs.^2);
 mu     = rhoB .* (vs.^2);
 
-%    for iy=1,size(vs,2)
-%        for ix=1,size(vs,1)
-%            mu_aver = zeros(size(vs,3)/10, 1);
-%            for ii=1,size(vs,3)/10
-%                for jj=1,10
-%                    mu_aver(ii) = mu_aver(ii) + mu(ix, iy, (ii-1)*10+jj);
-%                end
-%            end
-%        end
-%    end
+disp(['lambda: min ', num2str(min(lambda(:))), ', max ', num2str(max(lambda(:)))]);
+disp(['mu: min ', num2str(min(mu(:))), ', max ', num2str(max(mu(:)))]);
 
-%    lam_aver = zeros(size(vs,1), size(vs,2), size(vs,3)/10);
-%    mu_aver  = zeros(size(vs,1), size(vs,2), size(vs,3)/10);
-%    for ii=1,size(vs,3)/10
-%        for jj=1,10
-%            lam_aver(:,:,ii) = lam_aver(:,:,ii) + lambda(:, :, (ii-1)*10+jj);
-%            mu_aver(:,:,ii)  = mu_aver(:,:,ii)  + mu(:, :, (ii-1)*10+jj);
-%        end
-%    end
+N = 40;
 
-C = zeros(size(vs,1), size(vs,2), size(vs,3)/10);
-L = zeros(size(vs,1), size(vs,2), size(vs,3)/10);
-R = zeros(size(vs,1), size(vs,2), size(vs,3)/10);
-for ii=1,size(vs,3)/10
-    for jj=1,10
-        C(:,:,ii) = C(:,:,ii) + ones(size(vs,1), size(vs,2)) ./ (lambda(:, :, (ii-1)*10+jj) + 2.0*mu(:, :, (ii-1)*10+jj));
-        L(:,:,ii) = L(:,:,ii) + ones(size(vs,1), size(vs,2)) ./ mu(:, :, (ii-1)*10+jj);
-        R(:,:,ii) = R(:,:,ii) + rhoB(:, :, (ii-1)*10+jj);
+C = zeros(size(vs,1), size(vs,2), size(vs,3)/N);
+L = zeros(size(vs,1), size(vs,2), size(vs,3)/N);
+R = zeros(size(vs,1), size(vs,2), size(vs,3)/N);
+VP= zeros(size(vs,1), size(vs,2), size(vs,3)/N);
+VS= zeros(size(vs,1), size(vs,2), size(vs,3)/N);
+for ii=1:(size(vs,3)/N);
+    for jj=1:N;
+        C(:,:,ii) = C(:,:,ii) + ones(size(vs,1), size(vs,2)) ./ (lambda(:, :, (ii-1)*N+jj) + 2.0*mu(:, :, (ii-1)*N+jj));
+        L(:,:,ii) = L(:,:,ii) + ones(size(vs,1), size(vs,2)) ./ mu(:, :, (ii-1)*N+jj);
+        R(:,:,ii) = R(:,:,ii) + rhoB(:, :, (ii-1)*N+jj);
+        VP(:,:,ii)= VP(:,:,ii)+ vp(:, :, (ii-1)*N+jj);
+        VS(:,:,ii)= VS(:,:,ii)+ vs(:, :, (ii-1)*N+jj);
     end
-    C(:,:,ii) = C(:,:,ii) / 10.0;
-    L(:,:,ii) = L(:,:,ii) / 10.0;
-    R(:,:,ii) = R(:,:,ii) / 10.0;
+    C(:,:,ii) = C(:,:,ii) / N;
+    L(:,:,ii) = L(:,:,ii) / N;
+    R(:,:,ii) = R(:,:,ii) / N;
+    VP(:,:,ii)= VP(:,:,ii)/ N;
+    VS(:,:,ii)= VS(:,:,ii)/ N;
  end
 
 C = ones(size(C,1), size(C,2), size(C,3)) ./ C;
@@ -79,6 +74,12 @@ L = ones(size(L,1), size(L,2), size(L,3)) ./ L;
     
 vp_aver = sqrt(C ./ R);
 vs_aver = sqrt(L ./ R);
+
+disp(['rhoB_aver: min ', num2str(min(R(:))), ', max ', num2str(max(R(:)))]);
+disp(['vp_aver: min ', num2str(min(vp_aver(:))), ', max ', num2str(max(vp_aver(:)))]);
+disp(['vs_aver: min ', num2str(min(vs_aver(:))), ', max ', num2str(max(vs_aver(:)))]);
+disp(['VP: min ', num2str(min(VP(:))), ', max ', num2str(max(VP(:)))]);
+disp(['VS: min ', num2str(min(VS(:))), ', max ', num2str(max(VS(:)))]);
 
 
 rhoB_av_file = sprintf('%s_aver', rhoB_file)
@@ -103,10 +104,28 @@ if (vs_fid == -1)
 end
 
 
+rhoB_above = 2.2e+3*ones(60, 220, 50);
+rhoB_below = 2.5e+3*ones(60, 220, 50);
+
+vp_above = 3.2e+3*ones(60, 220, 50);
+vp_below = 3.9e+3*ones(60, 220, 50);
+
+vs_above = 1.7e+3*ones(60, 220, 50);
+vs_below = 2.1e+3*ones(60, 220, 50);
+
+
 for iy=1:size(vs,2)
+    fwrite(rhoB_fid, rhoB_above(:,iy,:), 'single');
     fwrite(rhoB_fid, R(:,iy,:), 'single');
+    fwrite(rhoB_fid, rhoB_below(:,iy,:), 'single');
+    
+    fwrite(vp_fid, vp_above(:,iy,:), 'single');
     fwrite(vp_fid, vp_aver(:,iy,:), 'single');
+    fwrite(vp_fid, vp_below(:,iy,:), 'single');
+    
+    fwrite(vs_fid, vs_above(:,iy,:), 'single');
     fwrite(vs_fid, vs_aver(:,iy,:), 'single');
+    fwrite(vs_fid, vs_below(:,iy,:), 'single');
 end
 
 fclose(rhoB_fid);
