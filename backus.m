@@ -1,8 +1,8 @@
-dir=sprintf('%s/spe_z85/',getenv('SCRATCH'));
+dir=sprintf('%s/spe_606080_2/',getenv('SCRATCH'));
 
-rhoB_file = sprintf('%s/rhoB_0', dir)
-vp_file   = sprintf('%s/vp_0', dir)
-vs_file   = sprintf('%s/vs_0', dir)
+rhoB_file = sprintf('%s/rhoB_160', dir)
+vp_file   = sprintf('%s/vp_160', dir)
+vs_file   = sprintf('%s/vs_160', dir)
 
 scale_from_files=1.0e+3;
 
@@ -22,19 +22,23 @@ if (vs_fid == -1)
     return;
 end
 
-rhoB = fread(rhoB_fid,[60*220*80 1],'single');
+Nx=60;
+Ny=60;
+Nz=80;
+
+rhoB = fread(rhoB_fid,[Nx*Ny*Nz 1],'single');
 rhoB = scale_from_files*rhoB;
-rhoB = reshape(rhoB, 60, 220, 80);
+rhoB = reshape(rhoB, Nx, Ny, Nz);
 fclose(rhoB_fid);
 
-vp = fread(vp_fid,[60*220*80 1],'single');
+vp = fread(vp_fid,[Nx*Ny*Nz 1],'single');
 vp = scale_from_files*vp;
-vp = reshape(vp, 60, 220, 80);
+vp = reshape(vp, Nx, Ny, Nz);
 fclose(vp_fid);
 
-vs = fread(vs_fid,[60*220*80 1],'single');
+vs = fread(vs_fid,[Nx*Ny*Nz 1],'single');
 vs = scale_from_files*vs;
-vs = reshape(vs, 60, 220, 80);
+vs = reshape(vs, Nx, Ny, Nz);
 fclose(vs_fid);
 
 disp(['rhoB: min ', num2str(min(rhoB(:))), ', max ', num2str(max(rhoB(:)))]);
@@ -47,7 +51,7 @@ mu     = rhoB .* (vs.^2);
 disp(['lambda: min ', num2str(min(lambda(:))), ', max ', num2str(max(lambda(:)))]);
 disp(['mu: min ', num2str(min(mu(:))), ', max ', num2str(max(mu(:)))]);
 
-N = 40;
+N = 10;
 
 C = zeros(size(vs,1), size(vs,2), size(vs,3)/N);
 L = zeros(size(vs,1), size(vs,2), size(vs,3)/N);
@@ -82,9 +86,31 @@ disp(['VP: min ', num2str(min(VP(:))), ', max ', num2str(max(VP(:)))]);
 disp(['VS: min ', num2str(min(VS(:))), ', max ', num2str(max(VS(:)))]);
 
 
-rhoB_av_file = sprintf('%s_aver', rhoB_file)
-vp_av_file   = sprintf('%s_aver', vp_file)
-vs_av_file   = sprintf('%s_aver', vs_file)
+rhoB_orig_file = sprintf('%s_orig', rhoB_file)
+vp_orig_file   = sprintf('%s_orig', vp_file)
+vs_orig_file   = sprintf('%s_orig', vs_file)
+
+rhoB_fid_orig = fopen(rhoB_orig_file, 'w');
+if (rhoB_fid_orig == -1)
+    disp(['Cannot open file ', rhoB_orig_file]);
+    return;
+end
+vp_fid_orig = fopen(vp_orig_file, 'w');
+if (vp_fid_orig == -1)
+    disp(['Cannot open file ', vp_orig_file]);
+    return;
+end
+vs_fid_orig = fopen(vs_orig_file, 'w');
+if (vs_fid_orig == -1)
+    disp(['Cannot open file ', vs_orig_file]);
+    return;
+end
+
+
+
+rhoB_av_file = sprintf('%s_backus', rhoB_file)
+vp_av_file   = sprintf('%s_backus', vp_file)
+vs_av_file   = sprintf('%s_backus', vs_file)
 
 
 rhoB_fid = fopen(rhoB_av_file, 'w');
@@ -103,18 +129,24 @@ if (vs_fid == -1)
     return;
 end
 
+Nz1=51;
+Nz2=21;
 
-rhoB_above = 2.2e+3*ones(60, 220, 50);
-rhoB_below = 2.5e+3*ones(60, 220, 50);
+rhoB_above = 2.0e+3*ones(Nx, Ny, Nz1);
+rhoB_below = 2.0e+3*ones(Nx, Ny, Nz2);
 
-vp_above = 3.2e+3*ones(60, 220, 50);
-vp_below = 3.9e+3*ones(60, 220, 50);
+vp_above = 3.0e+3*ones(Nx, Ny, Nz1);
+vp_below = 3.0e+3*ones(Nx, Ny, Nz2);
 
-vs_above = 1.7e+3*ones(60, 220, 50);
-vs_below = 2.1e+3*ones(60, 220, 50);
+vs_above = 1.6e+3*ones(Nx, Ny, Nz1);
+vs_below = 1.6e+3*ones(Nx, Ny, Nz2);
 
 
 for iy=1:size(vs,2)
+    fwrite(rhoB_fid_orig, rhoB(:,iy,:), 'single');
+    fwrite(vp_fid_orig, vp(:,iy,:), 'single');
+    fwrite(vs_fid_orig, vs(:,iy,:), 'single');
+        
     fwrite(rhoB_fid, rhoB_above(:,iy,:), 'single');
     fwrite(rhoB_fid, R(:,iy,:), 'single');
     fwrite(rhoB_fid, rhoB_below(:,iy,:), 'single');
@@ -131,4 +163,8 @@ end
 fclose(rhoB_fid);
 fclose(vp_fid);
 fclose(vs_fid);
+
+fclose(rhoB_fid_orig);
+fclose(vp_fid_orig);
+fclose(vs_fid_orig);
 
