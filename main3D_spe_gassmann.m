@@ -1,6 +1,6 @@
 Grid.Nx=60;  Grid.hx=20*.3;          % Dimension in x-direction
-Grid.Ny=220; Grid.hy=10*.3;          % Dimension in y-direction
-Grid.Nz=85;  Grid.hz=2*.3;           % Dimension in z-direction
+Grid.Ny=60; Grid.hy=10*.3;          % Dimension in y-direction
+Grid.Nz=80;  Grid.hz=2*.3;           % Dimension in z-direction
 N=Grid.Nx*Grid.Ny*Grid.Nz;              % Number of grid celles
 Grid.V=Grid.hx*Grid.hy*Grid.hz;         % Volume of each cells
 Fluid.vw=3e-4; Fluid.vo=3e-3;           % Viscosities
@@ -29,12 +29,36 @@ for iz=1:Grid.Nz
                 end
         end
 end
+%save_bin(0,'perm1',reshape(Grid.K(1,:,:,:),Grid.Nx*Grid.Ny*Grid.Nz,1));
+%save_bin(0,'perm2',reshape(Grid.K(2,:,:,:),Grid.Nx*Grid.Ny*Grid.Nz,1));
+%save_bin(0,'perm3',reshape(Grid.K(3,:,:,:),Grid.Nx*Grid.Ny*Grid.Nz,1));
 
 load spe_phi.dat;
 Phi=reshape(spe_phi',60,220,85);
 Por=Phi(1:Grid.Nx,1:Grid.Ny,1:Grid.Nz);
 Grid.por=max(Por(:),1e-2);
-save_bin(0,'por',Grid.por);
+%save_bin(0,'por',Grid.por);
+
+fname1=sprintf('%s/spe_606080_2/perm1_1_orig',getenv('SCRATCH'));
+fname2=sprintf('%s/spe_606080_2/perm2_1_orig',getenv('SCRATCH'));
+fname3=sprintf('%s/spe_606080_2/perm3_1_orig',getenv('SCRATCH'));
+fname4=sprintf('%s/spe_606080_2/por_1_orig',getenv('SCRATCH'));
+fid1=fopen(fname1,'w')
+fid2=fopen(fname2,'w')
+fid3=fopen(fname3,'w')
+fid4=fopen(fname4,'w')
+for i = 1:Grid.Ny
+    fwrite(fid1, Grid.K(1,:,i,:), 'single');
+    fwrite(fid2, Grid.K(2,:,i,:), 'single');
+    fwrite(fid3, Grid.K(3,:,i,:), 'single');
+    fwrite(fid4, Por(:,i,:), 'single');
+end
+fclose(fid1);
+fclose(fid2);
+fclose(fid3);
+fclose(fid4);
+
+return;
 
 I=ones(N,1);
 S=Fluid.swc*I;                          % Initial saturation
