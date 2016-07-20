@@ -5,9 +5,9 @@ above_prop=[2e+3 3e+3 1.6e+3];
 below_prop=[2e+3 3e+3 1.6e+3];
 scale_from_files=1.0e+3;
 
-n_cells_above = 120; %210; %120; %210
+n_cells_above = 55; %210; %120; %210
 n_cells_insid = 80;
-n_cells_below = 70; %110; %70; %110
+n_cells_below = 55; %110; %70; %110
 
 nX = 60;
 nY = 60;
@@ -29,7 +29,7 @@ for i=1:size(fnames(:))
     above=above_prop(i)*ones(nX,nY,n_cells_above);
     below=below_prop(i)*ones(nX,nY,n_cells_below);
 
-    fname_full=sprintf('%s_smooth_3D_f10',fname);
+    fname_full=sprintf('%s_square_smooth_2D_f20_3',fname);
     disp(['Output file ', fname_full]);
     fid=fopen(fname_full, 'w');
     if (fid == -1)
@@ -38,11 +38,12 @@ for i=1:size(fnames(:))
     end
 
     tic;
-    for iy=1:nY
+    iy=30;
+    %for iy=1:nY
         fwrite(fid,above(:,iy,:),'single');
         fwrite(fid,  arr(:,iy,:),'single');
         fwrite(fid,below(:,iy,:),'single');
-    end
+    %end
     
     toc;
     fclose(fid);
