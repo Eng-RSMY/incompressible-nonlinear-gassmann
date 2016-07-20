@@ -44,7 +44,6 @@ for i=1:size(fnames(:))
         fwrite(fid,  arr(:,iy,:),'single');
         fwrite(fid,below(:,iy,:),'single');
     %end
-    
     toc;
     fclose(fid);
 

@@ -71,7 +71,7 @@ for ii=1:(size(vs,3)/N);
     R(:,:,ii) = R(:,:,ii) / N;
     VP(:,:,ii)= VP(:,:,ii)/ N;
     VS(:,:,ii)= VS(:,:,ii)/ N;
- end
+end
 
 C = ones(size(C,1), size(C,2), size(C,3)) ./ C;
 L = ones(size(L,1), size(L,2), size(L,3)) ./ L;
@@ -167,4 +167,3 @@ fclose(vs_fid);
 fclose(rhoB_fid_orig);
 fclose(vp_fid_orig);
 fclose(vs_fid_orig);
-
